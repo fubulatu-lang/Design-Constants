@@ -1,6 +1,6 @@
 ---
 name: user-management
-description: Build an administrator-only User Management screen — create accounts, edit details, reset passwords with a one-time temporary password, set per-person permissions, and remove accounts, with the guard rails that stop anyone locking the whole organisation out. Use this whenever the user mentions user management, an admin panel for accounts, creating or inviting users, roles and permissions, an access-control or permission editor, forcing a password change on first sign-in, sign-in lockout, or deactivating and deleting accounts — and also whenever they are designing who-can-do-what in a multi-user app, even if they never say "user management".
+description: Build an administrator-only User Management screen — create accounts, edit details, reset passwords with a one-time temporary password, set per-person permissions, and remove accounts, with the guard rails that stop anyone locking the whole organisation out. Use this whenever the user mentions user management, an admin panel for accounts, creating or inviting users, roles and permissions, an access-control or permission editor, forcing a password change on first sign-in, sign-in lockout, or deactivating and deleting accounts — and equally for the other way in, where people sign themselves in through an identity provider and wait for an administrator to approve them: access requests, an approval queue, pending members, approve/reject, or notifying admins that somebody is waiting — and also whenever they are designing who-can-do-what in a multi-user app, even if they never say "user management".
 ---
 
 # User Management
@@ -21,11 +21,27 @@ account creation is a form an administrator fills in; there is no email round-tr
 server returns a one-time temporary password to pass on directly; and there is a set of
 refusals on the update endpoint that exist purely to keep the organisation reachable.
 
+**Some apps cannot work that way.** Where the population is large and mostly eligible — a
+company intranet, a staff app behind Google or Okta — enrolling everyone by hand is not
+realistic, and the identity provider has already answered most of "who is this". Those apps
+let people ask, and an administrator answers. The sentence becomes *an account is asked for
+and then given*, which keeps the part that mattered: **the asking is not the granting**, and
+the default is still no.
+
+That lifecycle is `references/request-and-approve.md`. It changes only how an account comes
+into existence — the permission model, the guard rails, the row menu and the activity log
+are the same. Pick one and build it; an app with two ways in has two sets of guard rails and
+a support question nobody can answer quickly.
+
 ## Before you start
 
 - **List the real permissions first.** The keys in the spec are placeholders and are almost
   certainly wrong for the app. See *Choosing the permission keys* below — this is the
   decision that shapes the screen, and it is worth making before writing code.
+- **Which way in?** Administrator-created accounts (the spec) or request-and-approve
+  (`references/request-and-approve.md`). Decide before the data model: the second needs a
+  `pending` state, a queue, and a notification path, and retrofitting those means touching
+  every status check in the app.
 - **Is there an account provisioned from outside the app?** If a setup tool creates the
   first administrator, that account needs the protection in §7.3 rule 3. If nothing outside
   the app provisions accounts, drop that rule rather than inventing one.
@@ -90,6 +106,12 @@ Each refusal is in §7.3 with the reason it exists.
 never emailed and never retrievable afterwards. The person is forced to set their own the
 first time they sign in.
 
+**Under request-and-approve, a transition is only a decision if it came FROM pending.**
+`→ inactive` is a rejection from `pending` and ordinary roster admin from `active`; `→
+active` is an approval from `pending` and a reinstatement from `inactive`. Key the triggers
+on the old status as well as the new one. This is the likeliest bug in that lifecycle and it
+stays invisible until it tells a colleague of two years that their request was not approved.
+
 **Use `COALESCE($n, column)` on the update.** An omitted field is left alone rather than
 nulled, so one handler serves a rename, a role change and a permission edit without the
 client sending the whole row.
@@ -108,5 +130,6 @@ status chip carries a word so state never depends on colour alone.
 | File | Read it when |
 |---|---|
 | `references/spec.md` | Building any part of the feature — the complete original specification, including every endpoint, flow and the acceptance checklist. |
+| `references/request-and-approve.md` | The app lets people sign themselves in and wait for approval, rather than having accounts created for them. The states, the transitions that are real decisions, notifying the administrators, marking the queue in the interface, and telling the person waiting. |
 | `../design-foundations/references/permissions.md` | Building the permission model. Start here. |
 | `../design-foundations/references/modal-accessibility.md` | Building the dialogs, the row menu or the permission editor. |

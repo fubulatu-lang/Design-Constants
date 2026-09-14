@@ -11,6 +11,22 @@ own tokens.
 
 ---
 
+## Contents
+
+- [1. What the feature is](#1-what-the-feature-is)
+- [2. The four files](#2-the-four-files)
+- [3. `version.js`](#3-versionjs)
+- [4. `changelog.js` — the data](#4-changelogjs--the-data)
+- [5. `ChangelogModal.jsx` — the dialog](#5-changelogmodaljsx--the-dialog)
+- [6. `useChangelogGate.js` — the automatic popup](#6-usechangeloggatejs--the-automatic-popup)
+- [7. The manual entry points](#7-the-manual-entry-points)
+- [8. Release discipline: keeping one version number](#8-release-discipline-keeping-one-version-number)
+- [9. How to write the entries — this is the part that makes it good](#9-how-to-write-the-entries--this-is-the-part-that-makes-it-good)
+- [10. Acceptance checklist](#10-acceptance-checklist)
+- [11. File manifest](#11-file-manifest)
+
+---
+
 ## 1. What the feature is
 
 A changelog that lives inside the app, written for the people who use it rather than for

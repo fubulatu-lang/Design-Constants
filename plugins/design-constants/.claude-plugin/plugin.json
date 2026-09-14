@@ -1,0 +1,8 @@
+{
+  "name": "design-constants",
+  "description": "Build in-app changelog, My Account and User Management features to a fixed specification, with a shared design-token, dialog-accessibility and permission foundation.",
+  "version": "1.0.0",
+  "author": { "name": "fubulatu-lang" },
+  "homepage": "https://github.com/fubulatu-lang/Design-Constants",
+  "keywords": ["changelog", "settings", "user-management", "design-system", "dark-mode", "permissions"]
+}

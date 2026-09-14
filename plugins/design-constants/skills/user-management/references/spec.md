@@ -12,6 +12,23 @@ there. No colours are specified; use the app's own tokens.
 
 ---
 
+## Contents
+
+- [1. What the feature is, in one paragraph](#1-what-the-feature-is-in-one-paragraph)
+- [2. Prerequisites in the target app](#2-prerequisites-in-the-target-app)
+- [3. The permission model — build this first](#3-the-permission-model--build-this-first)
+- [4. Data model](#4-data-model)
+- [5. The screen](#5-the-screen)
+- [6. The three flows](#6-the-three-flows)
+- [7. The server](#7-the-server)
+- [8. The account lifecycle this screen sits inside](#8-the-account-lifecycle-this-screen-sits-inside)
+- [9. Structural CSS](#9-structural-css)
+- [10. Accessibility requirements](#10-accessibility-requirements)
+- [11. Acceptance checklist](#11-acceptance-checklist)
+- [12. File manifest](#12-file-manifest)
+
+---
+
 ## 1. What the feature is, in one paragraph
 
 User Management is a single administrator-only screen listing every account in the

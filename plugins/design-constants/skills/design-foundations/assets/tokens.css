@@ -1,0 +1,91 @@
+/* ============================================================================
+ * Design tokens: light and dark.
+ *
+ * The theme is two data attributes on <body>; the stylesheet redefines the custom
+ * properties beneath them. No component ever asks what the theme is.
+ *
+ *   <body data-mode="dark" data-accent="accentOne">
+ *
+ * data-mode is ONLY ever "light" or "dark" — "system" is resolved in JavaScript before
+ * it is written, so the stylesheet never has to know that "system" exists.
+ *
+ * The neutral values below are specified exactly: the dark theme depends on them.
+ * Everything non-neutral is a placeholder for you to fill in.
+ * ========================================================================== */
+
+:root {
+  /* ---- Light: the default, no attribute needed ---- */
+  --surface:                #f2f3f5;  /* the page ground */
+  --surface-container:      #ffffff;  /* cards, sheets, menus */
+  --surface-container-high: #e9ebee;  /* hover / pressed / selected rows */
+  --on-surface:             #14161a;  /* primary text */
+  --on-surface-variant:     #5a6069;  /* secondary text, notes, helper text */
+  --outline:                #c3c8ce;  /* borders on interactive things */
+  --outline-variant:        #dfe3e7;  /* dividers, card hairlines */
+  --shadow-color:           rgba(0, 0, 0, .12);
+  --scrim:                  rgba(0, 0, 0, .40);  /* behind modals */
+}
+
+body[data-mode="dark"] {
+  /* ---- Dark: true black. The ground IS black, for OLED. ---- */
+  --surface:                #000000;
+  --surface-container:      #0b0b0c;  /* cards sit one step above the ground */
+  --surface-container-high: #17181a;  /* hover / pressed / selected rows */
+  --on-surface:             #e8eaed;  /* primary text — never pure white on black */
+  --on-surface-variant:     #9aa0a6;  /* secondary text */
+  --outline:                #3c4043;
+  --outline-variant:        #26282b;  /* dividers: visible, never bright */
+  --shadow-color:           rgba(0, 0, 0, .60);
+  --scrim:                  rgba(0, 0, 0, .65);
+}
+
+/* ---------------------------------------------------------------------------
+ * Elevation on black is a LIGHTER SURFACE, never a shadow — a drop shadow on
+ * #000000 is black on black, invisible, and still costs paint time.
+ * ------------------------------------------------------------------------- */
+
+.card {
+  background: var(--surface-container);
+  border-radius: 16px;
+}
+
+.card.elevated { box-shadow: 0 1px 3px var(--shadow-color); }
+
+body[data-mode="dark"] .card.elevated {
+  box-shadow: none;
+  border: 1px solid var(--outline-variant);   /* the edge a shadow used to give */
+}
+
+/* ---------------------------------------------------------------------------
+ * Accent and status tokens — STRUCTURE IS FIXED, VALUES ARE YOURS.
+ *
+ * Dark-mode accents go lighter and flatter: as a starting point raise lightness
+ * by 15–25% and cut saturation by 10–20% from the light value, then check
+ * contrast. Body text and icons need 4.5:1 against the surface they sit on;
+ * large text and UI borders need 3:1. A colour that passes on white very often
+ * fails on #0b0b0c, and the reverse.
+ * ------------------------------------------------------------------------- */
+
+body[data-accent="accentOne"] {
+  --primary:              /* accent, tuned for light backgrounds */ ;
+  --on-primary:           /* text on that: usually #ffffff */ ;
+  --primary-container:    /* a pale wash of the accent, for tonal buttons/chips */ ;
+  --on-primary-container: /* text on that wash */ ;
+}
+
+body[data-mode="dark"][data-accent="accentOne"] {
+  --primary:              /* lighter, less saturated than the light value */ ;
+  --on-primary:           /* text on that: usually #0b0b0c, NEVER #000000 */ ;
+  --primary-container:    /* a dark, desaturated tint — not the pale wash */ ;
+  --on-primary-container: /* text on that tint */ ;
+}
+
+/* Status colours follow exactly the same pattern, in both modes.
+   Never let colour be the only signal — every state that matters carries a word
+   or an icon too. */
+:root {
+  --success: ;
+  --warning: ;
+  --error:   ;
+  --info:    ;
+}

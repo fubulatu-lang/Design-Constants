@@ -12,6 +12,26 @@ in §7 are real, because the dark theme depends on the exact ones given.
 
 ---
 
+## Contents
+
+- [1. What the feature is, in one paragraph](#1-what-the-feature-is-in-one-paragraph)
+- [2. Prerequisites in the target app](#2-prerequisites-in-the-target-app)
+- [3. Entry point and routing](#3-entry-point-and-routing)
+- [4. Screen structure (exact order)](#4-screen-structure-exact-order)
+- [5. The Password card](#5-the-password-card)
+- [6. The Appearance card](#6-the-appearance-card)
+- [7. Light and dark mode — the token system](#7-light-and-dark-mode--the-token-system)
+- [8. The Install App card](#8-the-install-app-card)
+- [9. The Haptics card](#9-the-haptics-card)
+- [10. The Touch Sounds card](#10-the-touch-sounds-card)
+- [11. Layout / CSS structure](#11-layout--css-structure)
+- [12. Accessibility requirements](#12-accessibility-requirements)
+- [13. Optional: a second, administrator-facing app](#13-optional-a-second-administrator-facing-app)
+- [14. Acceptance checklist](#14-acceptance-checklist)
+- [15. File manifest](#15-file-manifest)
+
+---
+
 ## 1. What the feature is, in one paragraph
 
 My Account is a single settings sub-screen gathering everything a signed-in person can

@@ -1,0 +1,19 @@
+/* Structural styling for the Settings version link. Colours come from the app's tokens. */
+.version-link {
+  display: block;
+  width: 100%;
+  min-height: 44px;          /* the minimum comfortable tap target */
+  padding: 12px;
+  margin-top: 20px;
+  text-align: center;
+  font-size: .7rem;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  color: var(--on-surface-variant);
+}
+
+/* Stacked closing links (a user guide link, say) sit together as one block. */
+.version-link + .version-link { margin-top: 0; }

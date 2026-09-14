@@ -1,0 +1,10 @@
+<!--
+  For the very first paint on a slow connection, set the ground in the HTML document
+  itself, so even an empty page is the right colour. Put this in index.html's <head>.
+  Without it there is a white frame before the stylesheet lands.
+-->
+<meta name="theme-color" content="#f2f3f5" />
+<style>
+  html { background: #f2f3f5; }
+  @media (prefers-color-scheme: dark) { html { background: #000000; } }
+</style>

@@ -1,0 +1,123 @@
+# Build, name and publish every release so the in-app update check can find it.
+# Copy to .github/workflows/release.yml (or merge the publishing steps into an existing
+# workflow). Replace APP and RELEASES_REPO below. See references/publishing.md.
+#
+# - Pull requests: build only, APK uploaded as an artifact.
+# - Pushes to main: also publish release v<versionName> in this repository, marked latest,
+#   and, once the RELEASES_TOKEN secret is set, mirror it to the public releases repository.
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  APP: MyApp                          # TODO: as in Updates.APP
+  RELEASES_REPO: owner/myapp-releases # TODO: as in Updates.RELEASES_REPO (only needed when the code is private)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Empty until the secret is set; the mirror steps check it, so the build still passes.
+      RELEASES_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Must be signed with the app's one permanent key, or updates won't install over the
+      # old version. Fail here rather than fall back to a throwaway debug key.
+      - name: Build release APK
+        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Name the APK after its version
+        id: ver
+        run: |
+          VER=$(sed -n 's/^ *versionName = "\(.*\)"/\1/p' app/build.gradle.kts)
+          CODE=$(sed -n 's/^ *versionCode = \([0-9]*\)/\1/p' app/build.gradle.kts)
+          test -n "$VER" && test -n "$CODE"
+          echo "ver=$VER" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          cp app/build/outputs/apk/release/app-release.apk "$APP-$VER.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP }}-${{ steps.ver.outputs.ver }}-apk
+          path: ${{ env.APP }}-${{ steps.ver.outputs.ver }}.apk
+
+      - name: Publish the versioned release
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VER: ${{ steps.ver.outputs.ver }}
+          CODE: ${{ steps.ver.outputs.code }}
+        run: |
+          APK="$APP-$VER.apk"
+          NOTES="$APP $VER (build $CODE), from commit ${GITHUB_SHA::7}. Download $APK on your phone and install it. It updates an earlier $APP in place."
+          if gh release view "v$VER" > /dev/null 2>&1; then
+            # Same version pushed again without a bump: refresh the APK on that release.
+            gh release upload "v$VER" "$APK" --clobber
+            gh release edit "v$VER" --notes "$NOTES" --latest
+          else
+            gh release create "v$VER" "$APK" --target "$GITHUB_SHA" --title "$APP $VER" --notes "$NOTES" --latest
+          fi
+
+      # Anything else published as a release (content packs and so on) must use its own tag
+      # scheme and --latest=false, so releases/latest always means the newest app.
+
+      # Back-fill: if the public repository is missing earlier versions, copy them over,
+      # oldest first and not latest; the next step publishes this version last, on top.
+      # Runs only when something is missing.
+      - name: Copy earlier releases to the public releases repository
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && env.RELEASES_TOKEN != ''
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+          OWN_TOKEN: ${{ github.token }}
+          VER: ${{ steps.ver.outputs.ver }}
+        run: |
+          have=$(gh release list --repo "$RELEASES_REPO" --limit 300 --json tagName -q '.[].tagName')
+          older=$(GH_TOKEN="$OWN_TOKEN" gh release list --repo "$GITHUB_REPOSITORY" --limit 300 --json tagName,createdAt \
+            -q 'sort_by(.createdAt) | .[].tagName' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -vx "v$VER" || true)
+          missing=$(for t in $older; do echo "$have" | grep -qx "$t" || echo "$t"; done)
+          if [ -z "$missing" ]; then echo "All earlier releases are already published."; exit 0; fi
+          echo "Missing: $missing"
+          mkdir -p old
+          for t in $older; do
+            v=${t#v}
+            GH_TOKEN="$OWN_TOKEN" gh release download "$t" --repo "$GITHUB_REPOSITORY" --pattern "$APP-$v.apk" --dir old --clobber
+            notes=$(GH_TOKEN="$OWN_TOKEN" gh release view "$t" --repo "$GITHUB_REPOSITORY" --json body -q .body)
+            if echo "$have" | grep -qx "$t"; then gh release delete "$t" --repo "$RELEASES_REPO" --cleanup-tag --yes; fi
+            gh release create "$t" "old/$APP-$v.apk" --repo "$RELEASES_REPO" --target main --latest=false \
+              --title "$APP $v" --notes "$notes"
+            sleep 2
+          done
+
+      # The code repository is private, so the app checks for updates (and people download
+      # them) from a small public repository holding only the APKs. Skipped until
+      # RELEASES_TOKEN (a fine-grained token with Contents: write on that repository) is set.
+      - name: Mirror the release to the public releases repository
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && env.RELEASES_TOKEN != ''
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+          VER: ${{ steps.ver.outputs.ver }}
+          CODE: ${{ steps.ver.outputs.code }}
+        run: |
+          APK="$APP-$VER.apk"
+          NOTES="$APP $VER (build $CODE). Download $APK on your phone and install it. It updates an earlier $APP in place."
+          if gh release view "v$VER" --repo "$RELEASES_REPO" > /dev/null 2>&1; then
+            gh release upload "v$VER" "$APK" --clobber --repo "$RELEASES_REPO"
+            gh release edit "v$VER" --notes "$NOTES" --latest --repo "$RELEASES_REPO"
+          else
+            gh release create "v$VER" "$APK" --title "$APP $VER" --notes "$NOTES" --latest --repo "$RELEASES_REPO"
+          fi

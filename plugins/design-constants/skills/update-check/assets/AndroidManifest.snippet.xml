@@ -1,0 +1,20 @@
+<!-- Merge into app/src/main/AndroidManifest.xml. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Fetching releases and the APK. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Handing the APK to Android's installer. The first time, Android asks the person to
+         allow installs from this app. Not allowed for apps distributed through Google Play. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <application>
+        <!-- Shares cache/update/ (see res/xml/file_paths.xml) with the installer, one grant at a time. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+</manifest>

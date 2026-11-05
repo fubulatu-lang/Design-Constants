@@ -16,7 +16,7 @@ From the repo you want to build the feature in:
 /plugin install design-constants
 ```
 
-The four skills then appear in that project permanently, for anyone working in it. They
+The five skills then appear in that project permanently, for anyone working in it. They
 trigger on their own — you say *"we need release notes in the app"* and the changelog skill
 fires without you naming a file.
 
@@ -30,6 +30,7 @@ If you would rather not install a plugin, each skill is an ordinary folder: copy
 | **changelog** | An in-app "What's New" dialog: version history, a once-per-person-per-version popup, a Settings version link, and a build-time check that stops the version number disagreeing with itself. |
 | **my-account** | A personal settings sub-screen: change password, light/dark mode and accent, install to home screen, haptics and tap sounds. |
 | **user-management** | An administrator-only accounts screen: create, edit, reset password, per-person permissions, remove — with the guard rails that stop anyone locking the organisation out. |
+| **update-check** | An in-app update check for apps installed outside a store (sideloaded Android APKs): a check on every open against a public GitHub releases page, an Update / Ignore prompt, a safe download handed to Android's installer, a Settings row, and the CI that publishes each release (to a public releases-only repository when the code is private). |
 | **design-foundations** | The groundwork the other three share: the light/dark token system with a true-black dark theme, accessible dialog plumbing, and the server-owned permission model. |
 
 ## How a skill is laid out
@@ -51,8 +52,10 @@ months later, when the job is composing one release note rather than building th
 
 ## About the stack
 
-The reference code is **React + Vite**. The rules in each `SKILL.md` are written to be
-stack-neutral, and the three things that are genuinely Vite- or React-specific
+The reference code is **React + Vite**, except **update-check**, whose reference code is
+**Android (Kotlin and Jetpack Compose)** with a GitHub Actions workflow, because that is
+where an app has to update itself. The rules in each `SKILL.md` are written to be
+stack-neutral, and for the web skills the three things that are genuinely Vite- or React-specific
 (`import.meta.env.DEV`, direct `localStorage` access, JSX and hooks) are called out with
 their equivalents for Next.js, Vue and React Native.
 

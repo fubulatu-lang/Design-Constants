@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What the app may hand to another app: only a downloaded update, for Android's installer.
+     Keep it to this one folder; never expose the whole cache or files directory. -->
+<paths>
+    <cache-path name="update" path="update/" />
+</paths>
